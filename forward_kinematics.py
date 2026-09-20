@@ -99,7 +99,7 @@ class ForwardKinematics(Node):
             end_effector_position = self.forward_kinematics(theta1, theta2, theta3)
 
             marker = Marker()
-            marker.header.frame_id = "/base_link"
+            marker.header.frame_id = "base_link"
             marker.header.stamp = self.get_clock().now().to_msg()
             marker.type = marker.SPHERE
             marker.id = 0
