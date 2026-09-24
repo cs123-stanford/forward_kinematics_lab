@@ -146,7 +146,7 @@ Visualization Manager:
       Visual Enabled: true
     - Class: rviz_default_plugins/Marker
       Enabled: true
-      Name: Marker
+      Name: End Effectors
       Namespaces:
         "": true
       Topic:

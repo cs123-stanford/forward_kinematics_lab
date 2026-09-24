@@ -1,7 +1,7 @@
 from launch import LaunchDescription
-from launch.actions import RegisterEventHandler
-from launch.event_handlers import OnProcessExit
-from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
+from launch.conditions import IfCondition
+from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -28,12 +28,8 @@ def generate_launch_description():
     robot_description = {"robot_description": robot_description_content}
 
     # Get config file relative to this launch file
-    robot_controllers = PathJoinSubstitution(
-        [
-            os.path.dirname(__file__),
-            "forward_kinematics.yaml",
-        ]
-    )
+    lab_dir = os.path.dirname(os.path.abspath(__file__))
+    robot_controllers = PathJoinSubstitution([lab_dir, "forward_kinematics.yaml"])
 
     control_node = Node(
         package="controller_manager",
@@ -102,7 +98,29 @@ def generate_launch_description():
         output="both",
     )
 
+    # Browser-based 3D viewer (robot model + end-effector markers) at http://<pupper-ip>:8080.
+    #
+    #   ros2 launch forward_kinematics.launch.py viser:=false      # no web viewer (use RViz2)
+    #   ros2 launch forward_kinematics.launch.py viser_port:=8081  # different port
+    viser_viewer = ExecuteProcess(
+        cmd=[
+            "python3",
+            os.path.join(lab_dir, "forward_kinematics_viser.py"),
+            "--port",
+            LaunchConfiguration("viser_port"),
+        ],
+        cwd=lab_dir,
+        output="both",
+        condition=IfCondition(LaunchConfiguration("viser")),
+    )
+
     nodes = [
+        DeclareLaunchArgument(
+            "viser",
+            default_value="true",
+            description="Serve the robot model and end-effector markers in a viser web viewer.",
+        ),
+        DeclareLaunchArgument("viser_port", default_value="8080", description="Port for the viser viewer."),
         control_node,
         robot_state_pub_node,
         joint_state_broadcaster_spawner,
@@ -110,6 +128,7 @@ def generate_launch_description():
         kp_spawner,
         kd_spawner,
         foxglove_bridge,
+        viser_viewer,
     ]
 
     return LaunchDescription(nodes)
