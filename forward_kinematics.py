@@ -120,13 +120,15 @@ class ForwardKinematics(Node):
     # hip flexion/extension, knee) and returns the position of that leg's end effector
     # (the foot) as a 3-vector in the base_link frame.
     #
-    # Hip joint origins in base_link, straight from the URDF (pupper_v3.urdf.xacro):
+    # Hip motor (joint 1) positions in base_link, as in the lab diagrams. Each is
+    # followed by the 0.039 offset from motor 1 to motor 2, expressed in the frame
+    # of motor 1 (see the leg_front_l_1 -> leg_front_l_2 diagram).
     #
     #   leg        x        y
-    #   front_l   +0.07500  +0.08350
-    #   front_r   +0.07500  -0.08350
-    #   back_l    -0.07500  +0.07250
-    #   back_r    -0.07500  -0.07250
+    #   front_l   +0.07500  +0.04450
+    #   front_r   +0.07500  -0.04450
+    #   back_l    -0.07500  +0.03350
+    #   back_r    -0.07500  -0.03350
     #
     # The right legs are mirror images of the left legs. Move each leg by hand and check
     # that its marker follows the foot to verify your transforms.
@@ -142,7 +144,7 @@ class ForwardKinematics(Node):
         ############# Motor conventions according to slides #########
 
         # T_0_1 (base_link to leg_front_l_1)
-        T_0_1 = translation(0.07500, 0.08350, 0) @ rotation_x(1.57080) @ rotation_z(-theta1)
+        T_0_1 = translation(0.07500, 0.04450, 0) @ rotation_x(1.57080) @ rotation_z(-theta1)
 
         # T_1_2 (leg_front_l_1 to leg_front_l_2)
         ## TODO: Implement the transformation matrix from leg_front_l_1 to leg_front_l_2
